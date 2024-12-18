@@ -1,0 +1,24 @@
+﻿category_id,name,parent
+A001,Áo,
+A002,Áo kiểu,A001
+A003,Áo thun,A001
+A004,Áo sơ mi,A001
+A005,Áo khoác,A001
+A006,Đầm,
+A007,Đầm dáng xòe,A006
+A008,Đầm dáng ôm,A006
+A009,Đầm suông,A006
+A010,Đầm chữ A ,A006
+A011,Chân váy,
+A012,Chân váy dài,A011
+A013,Chân váy ngắn ,A011
+A014,Chân váy xếp ly ,A011
+A015,Chân váy chữ A,A011
+A016,Quần ,
+A017,Quần jean ,A016
+A018,Quần short,A016
+A019,Quần tây ,A016
+A020,Quần ống rộng,A016
+A021,Set trang phục,
+A022,Set bộ quần áo,A021
+A023,Set váy,A021

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "products",
     'cart',
     'user',
+    'import_export',
 ]
 AUTH_USER_MODEL = 'user.User'
 
@@ -91,7 +92,7 @@ DATABASES = {
         'ENGINE': 'mysql.connector.django',
         'NAME': 'vivu_db',  # Tên cơ sở dữ liệu bạn đã tạo
         'USER': 'root',  # Tên người dùng MySQL
-        'PASSWORD': '',  # Mật khẩu người dùng MySQL
+        'PASSWORD': 'anh1511!',  # Mật khẩu người dùng MySQL
         'HOST': 'localhost',  # Địa chỉ máy chủ (localhost nếu chạy trên máy cục bộ)
         'PORT': '3306',  # Cổng MySQL (mặc định là 3306)
     }
