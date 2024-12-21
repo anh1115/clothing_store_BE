@@ -58,11 +58,12 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
 class ReviewSerializer(serializers.ModelSerializer):
-    product_id = serializers.CharField(write_only=True)  # Sử dụng product_id thay vì product
+    product_id = serializers.CharField(write_only=True) 
+    full_name = serializers.CharField(source='user.full_name', read_only=True)
 
     class Meta:
         model = Review
-        fields = ['review_id', 'product_id', 'user', 'rating', 'comment']
+        fields = ['review_id', 'product_id','full_name', 'rating', 'comment']
     
     def create(self, validated_data):
         # Lấy product_id và tìm sản phẩm tương ứng

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     BannerList, ProductListView, ProductReviewListView, ProductSearchView, CategoryListView,
-    NewProductsView, FilterProductsByPriceView, ProductsByCategoryView, ProductDetail, ReviewCreateAPIView
+    NewProductsView, FilterProductsByPriceView, ProductsByCategoryView, ProductDetail, RelatedProductsView, ReviewCreateAPIView, TopSalesRealTimeAPIView,
 )
 
 urlpatterns = [
@@ -15,4 +15,6 @@ urlpatterns = [
     path('reviews/product/<str:product_id>/', ProductReviewListView.as_view(), name='product-reviews'),
     path('reviews/', ReviewCreateAPIView.as_view(), name='review-create'),
     path('banners/', BannerList.as_view(), name='banner-list'),
+    path('top-sales-realtime/', TopSalesRealTimeAPIView.as_view(), name='top-sales-realtime'),
+    path('related_products/<str:product_id>/', RelatedProductsView.as_view(), name='related-products'),
 ]

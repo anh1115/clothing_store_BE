@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'cart',
     'user',
     'import_export',
+    'django_filters',
 ]
 AUTH_USER_MODEL = 'user.User'
 
@@ -68,7 +69,7 @@ ROOT_URLCONF = 'shop_vivu.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

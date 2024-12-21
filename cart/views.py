@@ -10,6 +10,8 @@ from products.models import Color, Product, Size, StockQuantity
 from .serializers import OrderSerializer
 from rest_framework.views import APIView
 from uuid import uuid4
+from django.db import transaction
+
 
 def get_user_cart(user):
     """
@@ -176,21 +178,20 @@ class CreateOrderAPIView(APIView):
         if not selected_items:
             return Response({"error": "No products selected for the order."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Bắt đầu giao dịch để đảm bảo tính toàn vẹn dữ liệu
         try:
-            # Bắt đầu giao dịch
             with transaction.atomic():
                 # Cập nhật thông tin người dùng trong bảng User
                 user.full_name = full_name
                 user.phone = phone
                 user.address = address
                 user.save()
-
-                # Tạo đơn hàng với `uuid`
+                # Tạo đơn hàng với giá trị 0 đồng ban đầu
                 order = Order.objects.create(
                     order_id=f"OD{str(uuid4())[:8].upper()}",  # Tạo mã đơn hàng duy nhất
                     user=user,
                     status="pending",  # Mặc định trạng thái đơn hàng là "pending"
-                    total_price=0,  # Sẽ tính lại tổng giá sau
+                    total_price=0,  # Tổng giá ban đầu là 0 đồng
                     payment_method=request.data.get("payment_method", "cash_on_delivery"),
                 )
 
@@ -205,11 +206,11 @@ class CreateOrderAPIView(APIView):
                     size_id = item.get('size_id')
                     quantity = item.get('quantity', 0)
 
-                    # Không sử dụng các trường bổ sung để xác thực
                     product_name = item.get('product_name', '')  # Chỉ sử dụng cho hiển thị
                     color_name = item.get('color_name', '')  # Chỉ sử dụng cho hiển thị
                     size_name = item.get('size_name', '')  # Chỉ sử dụng cho hiển thị
                     product_sell_price = item.get('product_sell_price', '')
+                    
                     try:
                         product = Product.objects.get(product_id=product_id)
                         color = product.color.filter(color_id=color_id).first()
@@ -261,9 +262,9 @@ class CreateOrderAPIView(APIView):
                     except Product.DoesNotExist:
                         errors.append(f"Invalid product selected with ID '{product_id}'.")
 
-                # Nếu có lỗi, trả về tất cả lỗi
+                # Nếu có lỗi, rollback và không tạo đơn hàng
                 if errors:
-                    return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+                    raise Exception("Errors occurred while processing the order.")
 
                 # Cập nhật lại tổng giá đơn hàng
                 order.total_price = total_price
@@ -289,7 +290,9 @@ class CreateOrderAPIView(APIView):
                 return Response(response_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class OrderListView(APIView):
     permission_classes = [IsAuthenticated]

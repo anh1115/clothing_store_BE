@@ -1,0 +1,52 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1 style="text-align: center;">Thống kê sản phẩm bán chạy</h1>
+
+<!-- Form chọn lọc dữ liệu -->
+<form method="get" style="margin-bottom: 20px; display: flex; align-items: center;">
+  <!-- Lọc theo loại thời gian -->
+  <label for="filter"><strong>Lọc theo:</strong></label>
+  <select name="filter" id="filter" onchange="this.form.submit()" style="padding: 5px; margin-left: 10px;">
+      <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Tất cả</option>
+      <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Hôm nay</option>
+      <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Tháng này</option>
+      <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Năm này</option>
+  </select>
+
+  <!-- Lọc theo tháng -->
+  <label for="month" style="margin-left: 20px;"><strong>Chọn tháng:</strong></label>
+  <input type="month" name="month" id="month" value="{{ selected_month }}" style="padding: 5px; margin-left: 10px;">
+  
+  <button type="submit" style="padding: 5px 10px; margin-left: 10px; cursor: pointer;">Lọc</button>
+</form>
+
+
+<!-- Bảng thống kê -->
+<table style="color: #0f0f0f;width: 100%; border-collapse: collapse; text-align: left; font-size: 16px;">
+    <thead style="background-color: #f4f4f4; font-weight: bold;">
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 10px;">Mã sản phẩm</th>
+            <th style="border: 1px solid #ddd; padding: 10px;">Tên sản phẩm</th>
+            <th style="border: 1px solid #ddd; padding: 10px;">Số lượng đã bán</th>
+            <th style="border: 1px solid #ddd; padding: 10px;">Tổng doanh thu</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in sales_data %}
+        <tr style="background-color: {% cycle '#ffffff' '#f9f9f9' %};">
+            <td style="border: 1px solid #ddd; padding: 10px;">{{ item.product__product_id }}</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">{{ item.product__name }}</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">{{ item.quantity_sold }}</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">{{ item.total_sales }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" style="border: 1px solid #ddd; padding: 10px; background-color: #ffe6e6;">
+                Không có dữ liệu để hiển thị
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
