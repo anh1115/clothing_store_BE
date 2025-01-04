@@ -1,0 +1,14 @@
+<!-- sidebar.html -->
+{% extends "admin/base.html" %}
+{% block sidebar_menu %}
+    <!-- Menu mặc định của Django -->
+    {{ block.super }}
+
+    <!-- Thêm nút Thống kê -->
+    <li class="nav-item">
+        <a href="{% url 'dashboard' %}" class="nav-link">
+            <i class="nav-icon fas fa-chart-bar"></i>
+            <p>Thống kê</p>
+        </a>
+    </li>
+{% endblock %}

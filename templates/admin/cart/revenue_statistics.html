@@ -1,0 +1,39 @@
+{% extends 'admin/base_site.html' %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<h2>Tổng doanh thu: {{ total_revenue|floatformat:2 }} VNĐ</h2>
+
+<!-- Biểu đồ doanh thu theo tháng -->
+<canvas id="revenueChart" width="400" height="200"></canvas>
+
+<!-- Script Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ months|safe }},
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: {{ revenues|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<a href="{% url 'admin:cart_order_changelist' %}" class="btn btn-primary">Quay lại danh sách đơn hàng</a>
+{% endblock %}

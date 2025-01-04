@@ -1,0 +1,62 @@
+{% extends 'admin/base_site.html' %}
+
+{% block content %}
+    <h4 >Thống kê doanh thu</h4>
+
+    <form method="GET" class="mb-4" style="margin-left: 5rem;">
+        <label for="start_date">Chọn khoảng thời gian:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date|default:"2023-01-01" }}">
+        <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date|default:"2023-12-31" }}">
+        <button type="submit">Lọc</button>
+    </form>
+
+    <div style="width: 70%; margin: 0 auto;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Dữ liệu từ view
+        var dates = {{ dates|safe }};
+        var revenues = {{ revenues|safe }};
+        console.log('Dates:', dates);
+        console.log('Revenues:', revenues);
+
+        // Kiểm tra nếu không có doanh thu, hiển thị thông báo
+        if (dates.length === 0 || revenues.length === 0) {
+            alert('Không có doanh thu trong khoảng thời gian này.');
+        } else {
+            // Lấy context để vẽ biểu đồ
+            var ctx = document.getElementById('myChart').getContext('2d');
+        
+            var myChart = new Chart(ctx, {
+                type: 'line', // Loại biểu đồ là line (đường)
+                data: {
+                    labels: dates,  // Các nhãn là các ngày
+                    datasets: [{
+                        label: 'Doanh thu (VND)',  // Tiêu đề của biểu đồ
+                        data: revenues,  // Dữ liệu doanh thu
+                        borderColor: 'rgba(75, 192, 192, 1)',  // Màu đường
+                        fill: false,  // Không điền màu dưới đường
+                        tension: 0.1  // Độ cong của đường
+                    }]
+                },
+                options: {
+                    responsive: true,  // Biểu đồ tự động điều chỉnh kích thước
+                    plugins: {
+                        legend: {
+                            position: 'top',  // Vị trí của legend (chú thích)
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.raw === 0 ? 'Không có doanh thu' : tooltipItem.raw + ' VND';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+{% endblock %}
