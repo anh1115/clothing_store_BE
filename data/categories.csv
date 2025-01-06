@@ -1,0 +1,28 @@
+category_id,name,parent
+A001,Áo dễ phối,
+A002,Áo sơ mi,A001
+A003,Áo len,A001
+A004,Áo dệt kim,A001
+A005,Áo hai dây,A001
+A006,Áo nổi bật,
+A007,Áo dài,A006
+A008,Áo demi,A006
+A009,Áo vest,A006
+A010,Áo khoác,A006
+A011,Áo mangto,A006
+A012,Đầm,
+A013,Đầm công sở,A012
+A014,Đầm dạo phố,A012
+A015,Đầm dạ hội,A012
+A016,Jumpsuit,A012
+A017,Váy Đầm Hoa,A012
+A018,Chân váy,
+A019,Chân váy dài,A018
+A020,Chân váy ngắn,A018
+A021,Quần,
+A022,Quần dài,A021
+A023,Quần lửng,A021
+A024,Quần short,A021
+A025,Quần jean,A021
+A026,Quần áo dài,A021
+
