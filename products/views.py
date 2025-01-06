@@ -173,6 +173,21 @@ class ProductDetail(APIView):
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
+class CustomsPagination(PageNumberPagination):
+    page_size = 20  # Số sản phẩm mỗi trang mặc định
+    page_size_query_param = 'page_size'  # Tham số để client tùy chỉnh số sản phẩm mỗi trang
+    max_page_size = 100  # Giới hạn số lượng sản phẩm tối đa mỗi trang
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,  # Tổng số sản phẩm
+            'page_size': self.page_size,  # Số sản phẩm mỗi trang
+            'current_page': self.page.number,  # Trang hiện tại
+            'total_pages': self.page.paginator.num_pages,  # Tổng số trang
+            'results': data  # Dữ liệu sản phẩm
+        })
+
+
 class ProductSearchView(APIView):
     def get(self, request):
         search_query = request.query_params.get('q', '').strip()
@@ -186,15 +201,19 @@ class ProductSearchView(APIView):
             )
         else:
             products = Product.objects.all()
-        paginator = CustomPagination()
+
+        paginator = CustomsPagination()
         paginated_products = paginator.paginate_queryset(products, request)
-        
-        # Serialize và trả kết quả
-        
-        serializer = ProductSerializer(paginated_products, many=True)
-        return paginator.get_paginated_response(serializer.data)
-        # serializer = ProductSerializer(products, many=True)
-        # return Response(serializer.data)
+
+        if paginated_products is not None:
+            # Trường hợp sử dụng phân trang
+            serializer = ProductSerializer(paginated_products, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        # Trường hợp không sử dụng phân trang
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
 
         
 

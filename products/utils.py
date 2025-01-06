@@ -2,9 +2,10 @@ import requests, re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-import pandas as pd
-from products.models import Review
+from products.models import Product, Review
 from django.db.models import Count, Avg
+import joblib
+from user.models import User
 
 
 def get_vietnamese_stopwords():
@@ -37,51 +38,57 @@ def calculate_weighted_scores(cosine_sim, product, products):
 
     return weighted_scores
 
-# Tạo ma trận user-item từ bảng Review
-def create_user_item_matrix():
-    reviews = Review.objects.all()
-    data = [(review.user.user_id, review.product.product_id, review.rating) for review in reviews]
-    df = pd.DataFrame(data, columns=['user', 'product', 'rating'])
-    
-    # Chuyển đổi dữ liệu thành ma trận user-item
-    user_item_matrix = df.pivot_table(index='user', columns='product', values='rating')
-    return user_item_matrix
+# Tải mô hình đã huấn luyện
+model = joblib.load("recommendation/svd_model.pkl")
 
-# Tính độ tương tự giữa các khách hàng và gợi ý sản phẩm
-def recommend_products(user_id):
-    user_item_matrix = create_user_item_matrix()
+# Ánh xạ user_id và product_id thành chỉ mục
+users = User.objects.values('user_id')
+products = Product.objects.values('product_id')
 
-    # Kiểm tra nếu user_id không có trong ma trận thì gợi ý sản phẩm phổ biến
-    if user_item_matrix.empty or user_id not in user_item_matrix.index:
-        return recommend_popular_products()  
-    user_item_matrix_filled = user_item_matrix.fillna(0)
-    
-    # Tính độ tương tự cosine giữa các khách hàng
-    user_similarity = cosine_similarity(user_item_matrix_filled)
-    user_similarity_df = pd.DataFrame(user_similarity, index=user_item_matrix_filled.index, columns=user_item_matrix_filled.index)
-    similar_users = user_similarity_df[user_id].sort_values(ascending=False).drop(user_id)
+user_id_to_index = {user['user_id']: idx for idx, user in enumerate(users)}
+product_id_to_index = {product['product_id']: idx for idx, product in enumerate(products)}
 
-    # Lấy các sản phẩm mà các khách hàng tương tự đã đánh giá
-    recommended_products = []
-    for similar_user in similar_users.index:
-        similar_user_ratings = user_item_matrix.loc[similar_user]
-        recommended_products += similar_user_ratings[similar_user_ratings > 3].index.tolist()
-    recommended_products = list(set(recommended_products) - set(user_item_matrix.loc[user_id][user_item_matrix.loc[user_id] > 0].index.tolist()))
-
-    return recommended_products[:8]  
-
-def recommend_popular_products():
+def recommend_products(user_id, k=8):
     try:
-        reviews = Review.objects.all()
-        if not reviews.exists():
-            return []
+        # Kiểm tra nếu model không tồn tại
+        if not model:
+            print("Model chưa được tải. Gợi ý sản phẩm phổ biến.")
+            return recommend_popular_products(k)
 
-        # Tính điểm đánh giá trung bình cho mỗi sản phẩm và đếm số lượt đánh giá
-        product_counts = reviews.values('product__product_id') \
-            .annotate(avg_rating=Avg('rating'), review_count=Count('product__product_id')) \
-            .order_by('-avg_rating', '-review_count')
-        popular_products = [item['product__product_id'] for item in product_counts[:8]]
+        # Kiểm tra user_id có trong dữ liệu không
+        if user_id not in user_id_to_index:
+            print(f"user_id {user_id} không tồn tại. Gợi ý sản phẩm phổ biến.")
+            return recommend_popular_products(k)
 
-        return popular_products
+        # Lấy danh sách các sản phẩm hiện có
+        all_products = Product.objects.all().values_list('product_id', flat=True)
+        if not all_products.exists():
+            print("Không có sản phẩm nào. Gợi ý sản phẩm phổ biến.")
+            return recommend_popular_products(k)
+
+        # Dự đoán điểm đánh giá cho tất cả sản phẩm
+        predictions = [
+            (product_id, model.predict(user_id, product_id).est)
+            for product_id in all_products
+        ]
+
+        # Sắp xếp các sản phẩm theo điểm đánh giá dự đoán giảm dần
+        predictions.sort(key=lambda x: x[1], reverse=True)
+        # Lấy top K sản phẩm
+        recommended_products = [product_id for product_id, _ in predictions[:k]]
+
+        return recommended_products
     except Exception as e:
+        print(f"Error in recommend_products: {e}")
+        return recommend_popular_products(k)
+
+def recommend_popular_products(k=8):
+    try:
+        # Tính sản phẩm phổ biến dựa trên đánh giá
+        popular_products = Review.objects.values('product__product_id') \
+            .annotate(avg_rating=Avg('rating'), review_count=Count('review_id')) \
+            .order_by('-avg_rating', '-review_count')[:k]
+        return [item['product__product_id'] for item in popular_products]
+    except Exception as e:
+        print(f"Error in recommend_popular_products: {e}")
         return []
