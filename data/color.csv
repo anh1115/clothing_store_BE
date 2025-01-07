@@ -1,9 +1,26 @@
-name,slug,color_id
-Đen,black,C01
-Trắng,white,C02
-Đỏ,red,C03
-Be,beige,C04
-Kem,cream,C05
-Xanh,blue,C06
-Hồng,pink,C07
-Vàng,yellow,C08
+color_id,name
+C01,Cam
+C02,Ghi
+C03,Hồng
+C04,Hồng 1
+C05,Kem
+C06,Kem 1
+C07,Kem sáng
+C08,Nâu
+C09,Nâu 1
+C10,Trắng
+C11,Tím
+C12,Tím 1
+C13,Vàng
+C14,Vàng 1
+C15,Xanh
+C16,Xanh 1
+C17,Xanh 2
+C18,Xanh 4
+C19,Xanh 5
+C20,Xanh lá cây nhạt 1
+C21,Xanh ngọc
+C22,Đen
+C23,Đen 1
+C24,Đỏ
+C25,Đỏ 1
